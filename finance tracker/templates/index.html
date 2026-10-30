@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceTrack AI</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <div class="app-layout">
+
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">₹</div>
+                <div>
+                    <h2>FinanceTrack</h2>
+                    <small>Personal Finance AI</small>
+                </div>
+            </div>
+
+            <nav>
+                <a href="#dashboard" class="nav-link active">▦ Dashboard</a>
+                <a href="#analytics" class="nav-link">▥ Analytics</a>
+                <a href="#forecast" class="nav-link">◷ Expense Forecast</a>
+                <a href="#transactions" class="nav-link">⇄ Transactions</a>
+            </nav>
+
+            <div class="sidebar-note">
+                <span class="status-dot"></span>
+                Local processing mode
+                <p>Your statement is not saved in a database.</p>
+            </div>
+        </aside>
+
+        <main class="main-content" id="dashboard">
+
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">PERSONAL FINANCE</p>
+                    <h1>Financial Overview</h1>
+                    <p class="muted">Understand your spending. Plan smarter.</p>
+                </div>
+                <div class="date-badge" id="today"></div>
+            </header>
+
+            <section class="upload-card">
+                <div class="upload-info">
+                    <div class="upload-icon">↑</div>
+                    <div>
+                        <h2>Import bank statement</h2>
+                        <p>Upload CSV or a text-based PDF statement.</p>
+                        <small>Maximum 10 MB · No database · No permanent upload storage</small>
+                    </div>
+                </div>
+
+                <form id="uploadForm">
+                    <input type="file" id="statement" name="statement" accept=".csv,.pdf" required>
+
+                    <button type="submit" id="uploadButton">
+                        Analyze Statement
+                    </button>
+                </form>
+
+                <p id="statusMessage" class="status-message">
+                    Choose a statement to begin.
+                </p>
+            </section>
+
+            <div id="dashboardContent" hidden>
+
+                <section class="summary-grid">
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Total Income</span>
+                            <span class="stat-icon green">↙</span>
+                        </div>
+                        <h2 id="totalIncome">₹0</h2>
+                        <p>Detected credits</p>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Total Expenses</span>
+                            <span class="stat-icon orange">↗</span>
+                        </div>
+                        <h2 id="totalExpenses">₹0</h2>
+                        <p>Detected debits</p>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Net Cash Flow</span>
+                            <span class="stat-icon blue">₹</span>
+                        </div>
+                        <h2 id="netCashFlow">₹0</h2>
+                        <p>Income minus expenses</p>
+                    </article>
+
+                    <article class="stat-card">
+                        <div class="stat-top">
+                            <span>Next Month</span>
+                            <span class="stat-icon purple">⌁</span>
+                        </div>
+                        <h2 id="predictedExpense">₹0</h2>
+                        <p id="predictionMonth">Estimated spending</p>
+                    </article>
+                </section>
+
+                <section class="charts-grid" id="analytics">
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Monthly Spending</h2>
+                                <p>Income vs expenses</p>
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Expense Categories</h2>
+                                <p>Where your money goes</p>
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </article>
+
+                </section>
+
+                <section class="panel insights-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Spending Insights</h2>
+                            <p>Patterns identified in your statement</p>
+                        </div>
+                        <span class="ai-badge">AI Analysis</span>
+                    </div>
+
+                    <div id="insightsList" class="insights-list"></div>
+                </section>
+
+                <section class="panel" id="forecast">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Festival & Trip Planner</h2>
+                            <p>Adjust the forecast for planned extra expenses.</p>
+                        </div>
+                    </div>
+
+                    <div class="planner-grid">
+                        <div class="field">
+                            <label for="tripBudget">Planned trip budget (₹)</label>
+                            <input type="number" id="tripBudget" min="0" step="100" value="0">
+                        </div>
+
+                        <div class="field">
+                            <label for="festivalBudget">Festival budget (₹)</label>
+                            <input type="number" id="festivalBudget" min="0" step="100" value="0">
+                        </div>
+
+                        <div class="field planner-action">
+                            <label>Adjusted forecast</label>
+                            <button type="button" id="adjustButton">
+                                Update Forecast
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="forecast-result">
+                        <div>
+                            <p>Base ML estimate</p>
+                            <h3 id="baseForecast">₹0</h3>
+                        </div>
+                        <div>
+                            <p>With planned budgets</p>
+                            <h3 id="adjustedForecast">₹0</h3>
+                        </div>
+                    </div>
+
+                    <p class="muted" id="forecastNote"></p>
+                    <p class="muted">
+                        These are user-entered adjustments, not automatic
+                        festival predictions.
+                    </p>
+                </section>
+
+                <section class="panel" id="transactions">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>Recent Transactions</h2>
+                            <p id="transactionCount">Latest detected entries</p>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Expense</th>
+                                    <th>Income</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionTable"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+
+            <footer>
+                FinanceTrack AI · Educational project · Estimates are not financial advice.
+            </footer>
+
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+
+</html>
